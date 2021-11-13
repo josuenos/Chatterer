@@ -33,6 +33,8 @@ namespace Chatterer
         //private bool power_available = true;
         private bool quindar_toggle = true;
         private bool disable_beeps_during_chatter = false;
+        private bool allow_chatter_without_comms = false;
+        private bool fast_exchanges = false;
         //private bool remotetech_toggle = false;
         private bool sstv_on_science_toggle = true;
         //private bool disable_power_usage = false;
@@ -97,6 +99,8 @@ namespace Chatterer
             plugin_settings_node.AddValue("use_vessel_settings", use_vessel_settings);
             plugin_settings_node.AddValue("useBlizzy78Toolbar", useBlizzy78Toolbar);
             plugin_settings_node.AddValue("http_update_check", http_update_check);
+            plugin_settings_node.AddValue("fast_exchanges", fast_exchanges);
+            plugin_settings_node.AddValue("allow_chatter_without_comms", allow_chatter_without_comms);
             plugin_settings_node.AddValue("disable_beeps_during_chatter", disable_beeps_during_chatter);
             plugin_settings_node.AddValue("insta_chatter_key", insta_chatter_key);
             plugin_settings_node.AddValue("insta_sstv_key", insta_sstv_key);
@@ -138,6 +142,8 @@ namespace Chatterer
                 if (plugin_settings_node.HasValue("use_vessel_settings")) use_vessel_settings = Boolean.Parse(plugin_settings_node.GetValue("use_vessel_settings"));
                 if (plugin_settings_node.HasValue("useBlizzy78Toolbar")) useBlizzy78Toolbar = Boolean.Parse(plugin_settings_node.GetValue("useBlizzy78Toolbar"));
                 if (plugin_settings_node.HasValue("http_update_check")) http_update_check = Boolean.Parse(plugin_settings_node.GetValue("http_update_check"));
+                if (plugin_settings_node.HasValue("fast_exchanges")) fast_exchanges = Boolean.Parse(plugin_settings_node.GetValue("fast_exchanges"));
+                if (plugin_settings_node.HasValue("allow_chatter_without_comms")) allow_chatter_without_comms = Boolean.Parse(plugin_settings_node.GetValue("allow_chatter_without_comms"));
                 if (plugin_settings_node.HasValue("disable_beeps_during_chatter")) disable_beeps_during_chatter = Boolean.Parse(plugin_settings_node.GetValue("disable_beeps_during_chatter"));
                 if (plugin_settings_node.HasValue("insta_chatter_key")) insta_chatter_key = (KeyCode)Enum.Parse(typeof(KeyCode), plugin_settings_node.GetValue("insta_chatter_key"));
                 if (plugin_settings_node.HasValue("insta_sstv_key")) insta_sstv_key = (KeyCode)Enum.Parse(typeof(KeyCode), plugin_settings_node.GetValue("insta_sstv_key"));
@@ -195,6 +201,8 @@ namespace Chatterer
                 if (plugin_settings_node.HasValue("use_vessel_settings")) use_vessel_settings = Boolean.Parse(plugin_settings_node.GetValue("use_vessel_settings"));
                 if (plugin_settings_node.HasValue("useBlizzy78Toolbar")) useBlizzy78Toolbar = Boolean.Parse(plugin_settings_node.GetValue("useBlizzy78Toolbar"));
                 if (plugin_settings_node.HasValue("http_update_check")) http_update_check = Boolean.Parse(plugin_settings_node.GetValue("http_update_check"));
+                if (plugin_settings_node.HasValue("fast_exchanges")) fast_exchanges = Boolean.Parse(plugin_settings_node.GetValue("fast_exchanges"));
+                if (plugin_settings_node.HasValue("allow_chatter_without_comms")) allow_chatter_without_comms = Boolean.Parse(plugin_settings_node.GetValue("allow_chatter_without_comms"));
                 if (plugin_settings_node.HasValue("disable_beeps_during_chatter")) disable_beeps_during_chatter = Boolean.Parse(plugin_settings_node.GetValue("disable_beeps_during_chatter"));
                 if (plugin_settings_node.HasValue("insta_chatter_key")) insta_chatter_key = (KeyCode)Enum.Parse(typeof(KeyCode), plugin_settings_node.GetValue("insta_chatter_key"));
                 if (plugin_settings_node.HasValue("insta_sstv_key")) insta_sstv_key = (KeyCode)Enum.Parse(typeof(KeyCode), plugin_settings_node.GetValue("insta_sstv_key"));

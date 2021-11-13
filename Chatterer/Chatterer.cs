@@ -206,7 +206,7 @@ namespace Chatterer
         private int initial_chatter_index;  //index of random clip
         private List<AudioClip> response_chatter_set = new List<AudioClip>();   //and here
         private int response_chatter_index;
-        private int response_delay_secs;
+        private float response_delay_secs;
 
         //GUI
         private bool gui_running = false;
@@ -426,7 +426,7 @@ namespace Chatterer
                     else SetAppLauncherButtonTexture(chatterer_button_TX_muted);
                 }
                 else if (sstv.isPlaying) SetAppLauncherButtonTexture(chatterer_button_SSTV_muted);
-                else if (!inRadioContact) SetAppLauncherButtonTexture(chatterer_button_disabled_muted);
+                else if (!inRadioContact && !allow_chatter_without_comms) SetAppLauncherButtonTexture(chatterer_button_disabled_muted);
                 else SetAppLauncherButtonTexture(chatterer_button_idle_muted);
              
             }
@@ -443,7 +443,7 @@ namespace Chatterer
                     else SetAppLauncherButtonTexture(chatterer_button_TX);
                 }
                 else if (sstv.isPlaying) SetAppLauncherButtonTexture(chatterer_button_SSTV);
-                else if (!inRadioContact) SetAppLauncherButtonTexture(chatterer_button_disabled);
+                else if (!inRadioContact && !allow_chatter_without_comms) SetAppLauncherButtonTexture(chatterer_button_disabled);
                 else SetAppLauncherButtonTexture(chatterer_button_idle);
             }
         }
@@ -994,13 +994,15 @@ namespace Chatterer
                 else if (chatter_freq == 3) chatter_freq_str = "60-90s";
                 else if (chatter_freq == 4) chatter_freq_str = "30-60s";
                 else if (chatter_freq == 5) chatter_freq_str = "10-30s";
+                else if (chatter_freq == 6) chatter_freq_str = "5-10s";
+                else if (chatter_freq == 7) chatter_freq_str = "1-5s";
             }
 
             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
             _content.text = "Chatter frequency: " + chatter_freq_str;
             _content.tooltip = "How often chatter will play";
             GUILayout.Label(_content, label_txt_left, GUILayout.ExpandWidth(true));
-            chatter_freq_slider = GUILayout.HorizontalSlider(chatter_freq_slider, 0, 5f, GUILayout.Width(100f));
+            chatter_freq_slider = GUILayout.HorizontalSlider(chatter_freq_slider, 0, 7f, GUILayout.Width(100f));
             GUILayout.EndHorizontal();
 
             if (chatter_freq != prev_chatter_freq)
@@ -1020,7 +1022,7 @@ namespace Chatterer
             _content.tooltip = "Volume of chatter audio";
             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
             GUILayout.Label(_content, label_txt_left, GUILayout.ExpandWidth(true));
-            chatter_vol_slider = GUILayout.HorizontalSlider(chatter_vol_slider, 0, 1f, GUILayout.Width(130f));
+            chatter_vol_slider = GUILayout.HorizontalSlider(chatter_vol_slider, 0, 2f, GUILayout.Width(130f));
             GUILayout.EndHorizontal();
 
             if (chatter_vol_slider != prev_chatter_vol_slider)
@@ -1036,7 +1038,7 @@ namespace Chatterer
             _content.tooltip = "Volume of beeps before and after chatter";
             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
             GUILayout.Label(_content, label_txt_left, GUILayout.ExpandWidth(true));
-            quindar_vol_slider = GUILayout.HorizontalSlider(quindar_vol_slider, 0, 1f, GUILayout.Width(130f));
+            quindar_vol_slider = GUILayout.HorizontalSlider(quindar_vol_slider, 0, 2f, GUILayout.Width(130f));
             GUILayout.EndHorizontal();
 
             if (quindar_vol_slider != prev_quindar_vol_slider)
@@ -1044,6 +1046,7 @@ namespace Chatterer
                 if (debugging) Debug.Log("[CHATR] Quindar volume has been changed...");
                 quindar1.volume = quindar_vol_slider;
                 quindar2.volume = quindar_vol_slider;
+                quindar_toggle = (quindar_vol_slider != 0);
                 prev_quindar_vol_slider = quindar_vol_slider;
             }
 
@@ -1791,6 +1794,18 @@ namespace Chatterer
 
             if (vessel.GetCrewCount() > 0)
             {
+                _content.text = "Quick exchanges";
+                _content.tooltip = "Keeps delays between exchanges under 1 second";
+                GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                fast_exchanges = GUILayout.Toggle(fast_exchanges, _content);
+                GUILayout.EndHorizontal();
+
+                _content.text = "Allow chatter without radio comms";
+                _content.tooltip = "Keeps playing chatter even if the vessel has no communications link";
+                GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                allow_chatter_without_comms = GUILayout.Toggle(allow_chatter_without_comms, _content);
+                GUILayout.EndHorizontal();
+
                 _content.text = "Disable beeps during chatter";
                 _content.tooltip = "Stop beeps from beeping while chatter is playing";
                 GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
@@ -2858,6 +2873,8 @@ namespace Chatterer
             else if (chatter_freq == 3) secs_between_exchanges = rand.Next(60, 91);
             else if (chatter_freq == 4) secs_between_exchanges = rand.Next(30, 61);
             else if (chatter_freq == 5) secs_between_exchanges = rand.Next(10, 31);
+            else if (chatter_freq == 6) secs_between_exchanges = rand.Next(5, 11);
+            else if (chatter_freq == 7) secs_between_exchanges = rand.Next(1, 6);
             if (debugging) Debug.Log("[CHATR] new delay between exchanges: " + secs_between_exchanges.ToString("F0"));
         }
 
@@ -2876,7 +2893,7 @@ namespace Chatterer
             current_capsule_clip = rand.Next(0, current_capsule_chatter.Count); // select a new capsule clip to play
             current_capsuleF_clip = rand.Next(0, current_capsuleF_chatter.Count); // select a new capsuleF clip to play
 
-            response_delay_secs = rand.Next(2, 5);  // select another random int to set response delay time
+            response_delay_secs = (fast_exchanges ? UnityEngine.Random.Range(0.3f,0.7f) : UnityEngine.Random.Range(2f, 5f));  // select another random int to set response delay time
 
             if (pod_begins_exchange) initial_chatter_source = 1;    //pod_begins_exchange set true OnUpdate when staging and on event change
             else initial_chatter_source = rand.Next(0, 2);   //if i_c_s == 0, con sends first message; if i_c_S == 1, pod sends first message
@@ -3735,7 +3752,7 @@ namespace Chatterer
                 if (sstv_exists)
                 {
                     //insta-sstv activated
-                    if ((inRadioContact) && (insta_sstv_key_just_changed == false && Input.GetKeyDown(insta_sstv_key) && sstv.isPlaying == false))
+                    if ((inRadioContact || allow_chatter_without_comms) && (insta_sstv_key_just_changed == false && Input.GetKeyDown(insta_sstv_key) && sstv.isPlaying == false))
                     {
                         if (debugging) Debug.Log("[CHATR] beginning exchange,insta-SSTV");
                         if (exchange_playing)
@@ -3768,7 +3785,7 @@ namespace Chatterer
                             {
                                 sstv_timer = 0;
                                 new_sstv_loose_timer_limit();
-                                if (sstv.isPlaying == false && inRadioContact)
+                                if (sstv.isPlaying == false && (inRadioContact || allow_chatter_without_comms))
                                 {
 
                                     //get a random one and play
@@ -3793,7 +3810,7 @@ namespace Chatterer
                         {
                             if (science_transmitted == true) 
                             {
-                                if (sstv.isPlaying == false && (inRadioContact))
+                                if (sstv.isPlaying == false && (inRadioContact || allow_chatter_without_comms))
                                 {
                                     //stop and reset any currently playing chatter
                                     if (exchange_playing)
@@ -3825,7 +3842,7 @@ namespace Chatterer
                 //do beeps
                 if (beeps_exists)
                 {
-                    if (dict_probe_samples.Count > 0 && OTP_playing == false && (inRadioContact))   //don't do any beeps here while OTP is playing
+                    if (dict_probe_samples.Count > 0 && OTP_playing == false && (inRadioContact || allow_chatter_without_comms))   //don't do any beeps here while OTP is playing
                     {
                         foreach (BeepSource bm in beepsource_list)
                         {

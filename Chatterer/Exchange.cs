@@ -45,7 +45,7 @@ namespace Chatterer
                 //capcom starts the exchange
                 if (debugging) Debug.Log("[CHATR] Capcom starts the exchange...");
 
-                if (inRadioContact)
+                if (inRadioContact || allow_chatter_without_comms)
                 {
                     //in radio contact,
                     //play initial capcom
@@ -93,7 +93,7 @@ namespace Chatterer
 
             yield return new WaitForSeconds(response_delay_secs);
 
-            if (response_chatter_set.Count > 0 && (inRadioContact))
+            if (response_chatter_set.Count > 0 && (inRadioContact || allow_chatter_without_comms))
             {
                 if (debugging) Debug.Log("[CHATR] playing response");
                 if (initial_chatter_source == 1)
@@ -135,7 +135,7 @@ namespace Chatterer
                     else if (debugging) Debug.LogWarning("[CHATR] response_chatter already playing, move on...");
                 }
             }
-            else if (response_chatter_set.Count > 0 && !inRadioContact)
+            else if (response_chatter_set.Count > 0 && (!inRadioContact && !allow_chatter_without_comms))
             {
                 if (exchange_playing == true)
                 {
